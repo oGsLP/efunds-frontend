@@ -12,16 +12,9 @@
       light
       router
     >
-      <el-menu-item-group title="博客管理">
-        <template v-for="(item, index) in blog_item">
-          <el-menu-item v-if="!item.hidden" :key="index" :index="item.path"
-            ><i :class="item.class" class="fa"></i>{{ item.title }}
-          </el-menu-item>
-        </template>
-      </el-menu-item-group>
-      <el-menu-item-group title="ElementUI介绍">
-        <template v-for="(item, index) in element_item">
-          <el-menu-item v-if="!item.hidden" :key="index" :index="item.path"
+      <el-menu-item-group title="数据展示">
+        <template v-for="(item, index) in menu_item">
+          <el-menu-item :key="'menu-item' + index" :index="item.path"
             ><i :class="item.class" class="fa"></i>{{ item.title }}
           </el-menu-item>
         </template>
@@ -34,48 +27,21 @@ export default {
   name: "LeftMenu",
   data() {
     return {
-      element_item: [
+      menu_item: [
         {
-          title: "表单",
-          path: "/index/form",
-          class: "fa-newspaper-o",
+          title: "净值数据",
+          path: "/data/raw",
+          class: "fa-money",
         },
         {
-          title: "分页",
-          path: "/index/epage",
-          class: "fa-pagelines",
+          title: "收益分析",
+          path: "/data/returns",
+          class: "fa-bar-chart",
         },
         {
-          title: "标签页",
-          path: "/index/tab",
-          class: "fa-tag",
-        },
-        {
-          title: "导航栏",
-          path: "/index/navmenu",
-          class: "fa-bars",
-        },
-        {
-          title: "步骤条",
-          path: "/index/step",
-          class: "fa-step-forward",
-        },
-      ],
-      blog_item: [
-        {
-          title: "用户",
-          path: "/index/user",
-          class: "fa-user",
-        },
-        {
-          title: "文章",
-          path: "/index/article",
-          class: "fa-newspaper-o",
-        },
-        {
-          title: "评论",
-          path: "/index/comment",
-          class: "fa-comment-o",
+          title: "风险分析",
+          path: "/data/risk",
+          class: "fa-exclamation-triangle",
         },
       ],
     };
