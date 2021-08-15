@@ -7,10 +7,10 @@
 <template>
   <div id="index">
     <el-row class="container" style="height: 100%">
-      <v-header />
+      <eff-header />
       <el-col :span="24" class="main">
         <el-row>
-          <v-menu></v-menu>
+          <eff-menu />
           <section class="contentCon">
             <el-col :offset="3" :span="21" class="content-wrapper">
               <transition>
@@ -24,13 +24,17 @@
   </div>
 </template>
 <script>
+import LeftMenu from "./layout/LeftMenu";
+import Header from "./layout/Header";
+
 export default {
+  name: "Index",
   data() {},
   created() {},
   beforeCreate() {},
   components: {
-    "v-header": import("@/components/Header.vue"),
-    // "v-menu": menu,
+    "eff-header": Header,
+    "eff-menu": LeftMenu,
   },
 };
 </script>

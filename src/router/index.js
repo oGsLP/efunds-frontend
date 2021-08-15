@@ -6,7 +6,9 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
-    redirect: "index",
+    redirect: {
+      name: "raw",
+    },
   },
   {
     path: "/data",
@@ -15,7 +17,9 @@ const routes = [
       {
         path: "/",
         name: "index",
-        redirect: "raw",
+        redirect: {
+          name: "raw",
+        },
       },
       {
         path: "/data/raw",
@@ -37,6 +41,8 @@ const routes = [
 ];
 
 const router = new VueRouter({
+  mode: "hash",
+  linkActiveClass: "active",
   routes,
 });
 
