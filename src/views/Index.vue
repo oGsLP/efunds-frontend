@@ -12,7 +12,7 @@
         <el-row>
           <eff-menu />
           <section class="contentCon">
-            <el-col :offset="3" :span="21" class="content-wrapper">
+            <el-col :offset="0" :span="20" class="content-wrapper">
               <transition>
                 <router-view></router-view>
               </transition>
@@ -29,7 +29,6 @@ import Header from "./layout/Header";
 
 export default {
   name: "Index",
-  data() {},
   created() {},
   beforeCreate() {},
   components: {
