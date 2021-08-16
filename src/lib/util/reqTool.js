@@ -12,6 +12,10 @@ const generate_url = (url_template, code) => {
   return url_template.replace(constants.CODE_HOLDER, String(code));
 };
 
+const check_is_range_all = (range_type) =>
+  range_type !== constants.QUERY_RANGE_CURRENT_YEAR &&
+  range_type !== constants.QUERY_RANGE_PERIOD;
+
 const generate_params = (range_type, from_date, to_date) => {
   if (range_type === constants.QUERY_RANGE_CURRENT_YEAR) {
     return {
@@ -33,6 +37,7 @@ const generate_params = (range_type, from_date, to_date) => {
 const reqTool = {
   generate_url,
   generate_params,
+  check_is_range_all,
 };
 
 export default reqTool;
