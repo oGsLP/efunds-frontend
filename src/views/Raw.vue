@@ -7,6 +7,7 @@
 <template>
   <div id="raw">
     <h1>易方达消费行业股票走势</h1>
+    <h3>{{ from_date }} - {{ to_date }}</h3>
     <div id="raw-container"></div>
   </div>
 </template>
@@ -18,27 +19,6 @@ import constants from "../lib/constants";
 import reqTool from "../lib/util/reqTool";
 
 const ds = new DataSet();
-const scale = {
-  date: {
-    alias: "日期",
-    type: "time",
-  },
-  day_rate: {
-    alias: "日涨幅",
-    min: -25,
-    max: 15,
-    nice: true,
-    sync: true,
-    tickInterval: 5,
-  },
-  net_asset_value: {
-    alias: "净值",
-    min: 0,
-    nice: true,
-    sync: true,
-    tickInterval: 1,
-  },
-};
 export default {
   name: "Raw",
   data() {
@@ -57,11 +37,32 @@ export default {
        * ]
        */
       raw_data: [],
+      from_date: "",
+      to_date: "",
+      scale: {
+        date: {
+          alias: "日期",
+          type: "time",
+        },
+        day_rate: {
+          alias: "日涨幅",
+          min: -25,
+          max: 15,
+          nice: true,
+          sync: true,
+          tickInterval: 5,
+        },
+        net_asset_value: {
+          alias: "净值",
+          min: 0,
+          nice: true,
+          sync: true,
+          tickInterval: 1,
+        },
+      },
     };
   },
-  created() {
-    this.get_raw_data();
-  },
+  created() {},
   mounted() {
     this.chart = new Chart({
       container: "raw-container",
@@ -69,11 +70,11 @@ export default {
       height: 500,
       padding: [20, 80, 50, 80],
     });
+
     let that = this;
-    setTimeout(function () {
+    this.get_raw_data().then(() => {
       that.render_data();
-    }, 1000);
-    this.render_data();
+    });
   },
   methods: {
     async get_raw_data() {
@@ -82,12 +83,15 @@ export default {
         .then((res) => {
           if (res.data.code === 0) {
             this.raw_data = res.data.data;
+            if (this.raw_data.length !== 0) {
+              this.from_date = this.raw_data[0]["date"];
+              this.to_date = this.raw_data[this.raw_data.length - 1]["date"];
+            }
           }
           console.log(res.data.desc);
         });
     },
-    render_data() {
-      // console.log(this.raw_data.length);
+    transform_data() {
       let dv = ds.createView().source(this.raw_data);
       dv.transform({
         type: "pick",
@@ -108,9 +112,13 @@ export default {
           return row;
         },
       });
-      this.rows = dv.rows;
+      return dv.rows;
+    },
+    render_data() {
+      this.rows = this.transform_data();
+
       this.chart.data(this.rows);
-      this.chart.scale(scale);
+      this.chart.scale(this.scale);
 
       this.chart.axis("date", {
         label: {
@@ -133,6 +141,7 @@ export default {
         title: {},
         position: "left",
       });
+
       this.chart.axis("net_asset_value", {
         label: {
           autoHide: false,
@@ -177,6 +186,10 @@ export default {
 }
 
 #raw h1 {
+  text-align: center;
+}
+
+#raw h3 {
   text-align: center;
 }
 
