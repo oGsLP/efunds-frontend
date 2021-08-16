@@ -13,6 +13,7 @@
           <li>夏普率（频率/年）: {{ sharpe_yearly }}</li>
           <li>夏普率（频率/月）: {{ sharpe_monthly }}</li>
           <li>夏普率（频率/日）: {{ sharpe_daily }}</li>
+          <li v-if="sharpe !== ''">时间段内夏普率: {{ sharpe }}</li>
         </ul>
       </div>
       <div id="risk-sharpe-container" class="risk-container"></div>
@@ -20,8 +21,15 @@
 
     <div id="risk-mdd-area" class="risk-area">
       <div id="risk-mdd-data" class="risk-data">
-        <h3>{{ from_date }} - {{ to_date }}</h3>
-        <h4 v-if="sharpe !== ''">时间段内夏普率: {{ sharpe }}</h4>
+        <date-picker
+          id="risk-date-picker"
+          v-model="from_to"
+          confirm
+          format="YYYYMMDD"
+          range
+          value-type="format"
+          @confirm="reset_date_and_data"
+        ></date-picker>
         <ul>
           <li>最大回撤率: {{ mdd === "" ? "" : mdd["mdd"] }}</li>
           <li>
@@ -46,6 +54,9 @@
 import { DataSet } from "@antv/data-set";
 import { Chart } from "@antv/g2";
 
+import DatePicker from "vue2-datepicker";
+import "vue2-datepicker/index.css";
+
 import constants from "../lib/constants";
 import reqTool from "../lib/util/reqTool";
 
@@ -53,8 +64,10 @@ const ds = new DataSet();
 
 export default {
   name: "Risk",
+  components: { DatePicker },
   data() {
     return {
+      time1: null,
       sharpe_chart: null,
       mdd_chart: null,
       sharpe_rows: [],
@@ -68,8 +81,7 @@ export default {
       sharpe_monthly: "",
       sharpe_daily: "",
       range_type: constants.QUERY_RANGE_ALL,
-      from_date: "",
-      to_date: "",
+      from_to: ["", ""],
       sharpe_scale: {
         year: {
           alias: "年份",
@@ -116,8 +128,8 @@ export default {
         .get(reqTool.generate_url(constants.REQ_URL.GET_RISK_DATA, this.code), {
           params: reqTool.generate_params(
             this.range_type,
-            this.from_date,
-            this.to_date
+            this.from_to[0],
+            this.from_to[1]
           ),
         })
         .then((res) => {
@@ -126,8 +138,9 @@ export default {
             this.mdd = data["mdd"];
             this.mdd_list = data["mdd_list"];
             if (this.mdd_list.length > 0) {
-              this.from_date = this.mdd_list[0]["from"];
-              this.to_date = this.mdd_list[0]["to"];
+              this.from_to[0] = this.mdd_list[0]["from"];
+              this.from_to[1] = this.mdd_list[0]["to"];
+              this.from_to.sort();
             }
             if (reqTool.check_is_range_all(this.range_type)) {
               this.sharpe_year_list = data["sharpe_year_list"];
@@ -265,6 +278,12 @@ export default {
 
       this.mdd_chart.render();
     },
+    reset_date_and_data() {
+      this.range_type = constants.QUERY_RANGE_PERIOD;
+      this.get_risk_data().then(() => {
+        this.render_mdd_data();
+      });
+    },
   },
 };
 </script>
@@ -308,5 +327,9 @@ export default {
 
 #risk-mdd-area {
   margin-top: 20px;
+}
+
+#risk-date-picker {
+  width: 100%;
 }
 </style>
