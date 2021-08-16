@@ -7,7 +7,16 @@
 <template>
   <div id="returns">
     <h1>易方达消费行业股票收益分析</h1>
-    <h3>{{ from_date }} - {{ to_date }}</h3>
+    <date-picker
+      id="returns-date-picker"
+      v-model="from_to"
+      clearable="false"
+      confirm
+      format="YYYYMMDD"
+      range
+      value-type="format"
+      @confirm="reset_date_and_data"
+    ></date-picker>
     <div id="returns-container"></div>
   </div>
 </template>
@@ -15,6 +24,10 @@
 <script>
 import { DataSet } from "@antv/data-set";
 import { Chart } from "@antv/g2";
+
+import DatePicker from "vue2-datepicker";
+import "vue2-datepicker/index.css";
+
 import constants from "../lib/constants";
 import reqTool from "../lib/util/reqTool";
 
@@ -22,6 +35,7 @@ const ds = new DataSet();
 
 export default {
   name: "Returns",
+  components: { DatePicker },
   data() {
     return {
       chart: null,
@@ -41,8 +55,7 @@ export default {
       crr_list: [],
       hrr: "",
       range_type: constants.QUERY_RANGE_ALL,
-      from_date: "",
-      to_date: "",
+      from_to: ["", ""],
       scale: {
         date: {
           alias: "日期",
@@ -78,8 +91,8 @@ export default {
           {
             params: reqTool.generate_params(
               this.range_type,
-              this.from_date,
-              this.to_date
+              this.from_to[0],
+              this.from_to[1]
             ),
           }
         )
@@ -88,8 +101,9 @@ export default {
             this.crr_list = res.data.data["crr_list"];
             this.hrr = res.data.data["hrr"];
             if (this.crr_list.length !== 0) {
-              this.from_date = this.crr_list[0]["date"];
-              this.to_date = this.crr_list[this.crr_list.length - 1]["date"];
+              this.from_to[0] = this.crr_list[0]["date"];
+              this.from_to[1] = this.crr_list[this.crr_list.length - 1]["date"];
+              this.from_to.sort();
             }
           }
           console.log(res.data.desc);
@@ -115,6 +129,7 @@ export default {
     },
     render_data() {
       // console.log(this.raw_data.length);
+      this.chart.clear();
 
       this.rows = this.transform_data();
       this.chart.data(this.rows);
@@ -164,6 +179,12 @@ export default {
 
       this.chart.render();
     },
+    reset_date_and_data() {
+      this.range_type = constants.QUERY_RANGE_PERIOD;
+      this.get_returns_data().then(() => {
+        this.render_data();
+      });
+    },
   },
 };
 </script>
@@ -177,7 +198,9 @@ export default {
   text-align: center;
 }
 
-#returns h3 {
+#returns-date-picker {
+  left: 40%;
+  width: 20%;
   text-align: center;
 }
 

@@ -7,7 +7,16 @@
 <template>
   <div id="raw">
     <h1>易方达消费行业股票走势</h1>
-    <h3>{{ from_date }} - {{ to_date }}</h3>
+    <date-picker
+      id="raw-date-picker"
+      v-model="from_to"
+      clearable="false"
+      confirm
+      format="YYYYMMDD"
+      range
+      value-type="format"
+      @confirm="reset_date_and_data"
+    ></date-picker>
     <div id="raw-container"></div>
   </div>
 </template>
@@ -15,12 +24,18 @@
 <script>
 import { DataSet } from "@antv/data-set";
 import { Chart } from "@antv/g2";
+
+import DatePicker from "vue2-datepicker";
+import "vue2-datepicker/index.css";
+
 import constants from "../lib/constants";
 import reqTool from "../lib/util/reqTool";
 
 const ds = new DataSet();
 export default {
   name: "Raw",
+  components: { DatePicker },
+
   data() {
     return {
       chart: null,
@@ -37,8 +52,7 @@ export default {
        * ]
        */
       raw_data: [],
-      from_date: "",
-      to_date: "",
+      from_to: ["", ""],
       scale: {
         date: {
           alias: "日期",
@@ -71,21 +85,27 @@ export default {
       padding: [20, 80, 50, 80],
     });
 
-    let that = this;
     this.get_raw_data().then(() => {
-      that.render_data();
+      this.render_data();
     });
   },
   methods: {
     async get_raw_data() {
       await this.$axios
-        .get(reqTool.generate_url(constants.REQ_URL.GET_RAW_DATA, this.code))
+        .get(reqTool.generate_url(constants.REQ_URL.GET_RAW_DATA, this.code), {
+          params: reqTool.generate_params(
+            this.range_type,
+            this.from_to[0],
+            this.from_to[1]
+          ),
+        })
         .then((res) => {
           if (res.data.code === 0) {
             this.raw_data = res.data.data;
             if (this.raw_data.length !== 0) {
-              this.from_date = this.raw_data[0]["date"];
-              this.to_date = this.raw_data[this.raw_data.length - 1]["date"];
+              this.from_to[0] = this.raw_data[0]["date"];
+              this.from_to[1] = this.raw_data[this.raw_data.length - 1]["date"];
+              this.from_to.sort();
             }
           }
           console.log(res.data.desc);
@@ -176,6 +196,12 @@ export default {
 
       this.chart.render();
     },
+    reset_date_and_data() {
+      this.range_type = constants.QUERY_RANGE_PERIOD;
+      this.get_raw_data().then(() => {
+        this.render_data();
+      });
+    },
   },
 };
 </script>
@@ -189,7 +215,9 @@ export default {
   text-align: center;
 }
 
-#raw h3 {
+#raw-date-picker {
+  left: 40%;
+  width: 20%;
   text-align: center;
 }
 

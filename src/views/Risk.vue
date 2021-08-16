@@ -28,6 +28,7 @@
           format="YYYYMMDD"
           range
           value-type="format"
+          clearable="false"
           @confirm="reset_date_and_data"
         ></date-picker>
         <ul>
@@ -167,6 +168,7 @@ export default {
     },
     render_sharpe_data() {
       // console.log(this.raw_data.length);
+      this.sharpe_chart.clear();
 
       this.sharpe_rows = this.transform_sharpe_data();
       this.sharpe_chart.data(this.sharpe_rows);
@@ -227,6 +229,8 @@ export default {
       return dv.rows;
     },
     render_mdd_data() {
+      this.mdd_chart.clear();
+
       this.mdd_rows = this.transform_mdd_data();
       this.mdd_chart.data(this.mdd_rows);
       this.mdd_chart.scale(this.mdd_scale);
